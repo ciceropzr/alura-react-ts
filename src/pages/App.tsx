@@ -1,30 +1,51 @@
-import React, { useState } from 'react';
-import Form from '../components/Form';
-import List from '../components/List';
-import Timer from '../components/Timer'
+import React, { useState } from 'react'
+import Formulario from '../components/Formulario'
+import Lista from '../components/Lista'
+import Cronometro from '../components/Cronometro'
+import { ITarefa } from '../types/tarefas'
 import style from './style.module.scss'
 
 function App() {
-  const [tarefas, setTarefas] = useState([
-    {
-      tarefa: 'Javascript',
-      tempo: '01:00:00'
-    },
-    {
-      tarefa: 'React',
-      tempo: '02:00:00'
-    },
-    {
-      tarefa: 'Typescript',
-      tempo: '03:00:00'
+  const [tarefas, setTarefas] = useState<ITarefa[]>([])
+  const [selecionado, setSelecionado] = useState<ITarefa>()
+
+  function selecionaTarefa(tarefaSelecionada: ITarefa) {
+    setSelecionado(tarefaSelecionada)
+    setTarefas(tarefasAnteriores => tarefasAnteriores.map(tarefa => ({
+      ...tarefa,
+      selecionado: tarefa.id === tarefaSelecionada.id,
+    })))
+  }
+
+  function finalizarTarefa() {
+    if (selecionado) {
+      setSelecionado(undefined)
+      setTarefas(tarefasAnteriores =>
+        tarefasAnteriores.map(tarefa => {
+          if (tarefa.id === selecionado.id) {
+            return {
+              ...tarefa,
+              selecionado: false,
+              completado: true,
+            }
+          }
+          return tarefa
+        })
+      )
     }
-  ])
+  }
 
   return (
     <div className={style.AppStyle}>
-      <Form setTarefas={setTarefas}/>
-      <List tarefas={tarefas}/>
-      <Timer/>
+      <Formulario setTarefas={setTarefas}/>
+      <Lista
+        tarefas={tarefas}
+        selecionaTarefa={selecionaTarefa}
+      />
+      <Cronometro
+        selecionado={selecionado}
+        finalizarTarefa={finalizarTarefa}
+      />
     </div>
   );
 }
